@@ -134,6 +134,7 @@ vs día anterior)
 # Alertas
 alerts <- list()
 
+# Alerta para Outside20
 if (current_data$Outside20) {
   alert_type <- if_else(current_data$D_Close > current_data$Higher20, "warning", "danger")
   alert_msg <- if_else(
@@ -144,26 +145,41 @@ if (current_data$Outside20) {
   alerts <- append(alerts, list(list(type = alert_type, message = alert_msg)))
 }
 
+# Alerta para Outside50
+if (current_data$Outside50) {
+  alert_type <- if_else(current_data$D_Close > current_data$Higher50, "warning", "danger")
+  alert_msg <- if_else(
+    current_data$D_Close > current_data$Higher50, 
+    "⚠️ Precio fuera de banda superior (50 períodos) - Posible sobredepreciación",
+    "🚨 Precio fuera de banda inferior (50 períodos) - Posible sobreapreciación"
+  )
+  alerts <- append(alerts, list(list(type = alert_type, message = alert_msg)))
+}
+
+# Alerta RSI
 if (!is.na(current_data$rsi)) {
   if (current_data$rsi > 70) {
-    alerts <- append(alerts, list(list(type = "warning", message = "⚠️ RSI indica condición de sobredepreciación")))
+    alerts <- append(alerts, list(list(type = "warning", message = "⚠️ RSI indica condición de sobrecompra")))
   } else if (current_data$rsi < 30) {
-    alerts <- append(alerts, list(list(type = "danger", message = "🚨 RSI indica condición de sobreapreciación")))
+    alerts <- append(alerts, list(list(type = "danger", message = "🚨 RSI indica condición de sobreventa")))
   }
 }
 
+# Alerta movimiento diario inusual
 if (abs(current_data$`%D`) > quantile(abs(df_data$`%D`), 0.95, na.rm = TRUE)) {
   alerts <- append(alerts, list(list(type = "warning", message = "⚠️ Movimiento diario inusual detectado")))
 }
 
+# Renderizar alertas
 if (length(alerts) > 0) {
   for (alert in alerts) {
-    cat(paste0('<div class="alert alert-', alert$type, '">', alert$message, '</div>'))
+    cat(paste0('<div class="alert alert-', alert$type, '">', alert$message, '</div>\n'))
   }
 } else {
-  cat('<div class="alert alert-success">✅ No se detectaron señales de alerta inmediatas</div>')
+  cat('<div class="alert alert-success">✅ No se detectaron señales de alerta inmediatas</div>\n')
 }
 ```
+
 
 # 📈 Posición Actual
 
